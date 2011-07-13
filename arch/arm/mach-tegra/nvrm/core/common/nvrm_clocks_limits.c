@@ -47,9 +47,16 @@
 
 #define MAX_OVERCLOCK (1600000)
 #define MAX_VOLTAGE (1375)
-#define MAX_GPCLOCK (400000)
-#define MAX_AVPCLOCK (266400)
 
+// Graphics Overclock
+#if defined(OC_GPCLOCK)
+  #define MAX_GPCLOCK (400000)
+#endif
+
+
+#if defined(OC_AVPCLOCK)
+  #define MAX_AVPCLOCK (266400)
+#endif
 // Voltage list for corresponding clocks
 NvU32 FakeShmooVoltages[] = {
 	875,
@@ -178,8 +185,10 @@ NvRmPrivClockLimitsInit(NvRmDeviceHandle hRmDevice)
     // Combine AVP/System clock absolute limit with scaling V/F ladder upper
     // boundary, and set default clock range for all present modules the same
     // as for AVP/System clock
-    AvpMaxKHz = MAX_AVPCLOCK;
 
+    #if defined(OC_AVPCLOCK)
+        AvpMaxKHz = MAX_AVPCLOCK;
+    #else
     for (i = 0; i < NvRmPrivModuleID_Num; i++)
     {
         NvRmModuleInstance *inst;
@@ -190,7 +199,7 @@ NvRmPrivClockLimitsInit(NvRmDeviceHandle hRmDevice)
 
         }
     }
-
+    #endif
     // Fill in limits for modules with slectable clock sources and/or dividers
     // as specified by the h/w table according to the h/w device ID
     // (CPU and AVP are not in relocation table - need translate id explicitly)
@@ -211,7 +220,7 @@ NvRmPrivClockLimitsInit(NvRmDeviceHandle hRmDevice)
             (pHwLimits[i].SubClockId == 0))
         {
             s_ClockRangeLimits[id].MinKHz = pHwLimits[i].MinKHz;
-            s_ClockRangeLimits[id].MaxKHz =
+            s_ClockRangeLimits[id].MaxKHz = 
                 pHwLimits[i].MaxKHzList[pShmoo->ShmooVmaxIndex];
             s_pClockScales[id] = pHwLimits[i].MaxKHzList;
         }
@@ -242,7 +251,13 @@ NvRmPrivClockLimitsInit(NvRmDeviceHandle hRmDevice)
     // Set VDE upper clock boundary with combined Absolute/Scaled limit (on
     // AP15/Ap16 VDE clock derived from the system bus, and VDE maximum limit
     // must be the same as AVP/System).
-    VdeMaxKHz = MAX_AVPCLOCK;
+    #if defined(OC_AVPCLOCK)
+        VdeMaxKHz = MAX_AVPCLOCK;
+    #else
+        VdeMaxKHz = pSKUedLimits->VdeMaxKHz;
+        VdeMaxKHz = NV_MIN(
+            VdeMaxKHz, s_ClockRangeLimits[NvRmModuleID_Vde].MaxKHz);
+    #endif
     if ((hRmDevice->ChipId.Id == 0x15) || (hRmDevice->ChipId.Id == 0x16))
     {
         NV_ASSERT(VdeMaxKHz == AvpMaxKHz);
@@ -283,7 +298,13 @@ NvRmPrivClockLimitsInit(NvRmDeviceHandle hRmDevice)
         NVRM_SDRAM_MIN_KHZ;
 
     // Set 3D upper clock boundary with combined Absolute/Scaled limit.
-    TDMaxKHz = MAX_GPCLOCK;
+    #if defined(OC_GPCLOCK)
+      TDMaxKHz = MAX_GPCLOCK;
+    #else
+      TDMaxKHz = pSKUedLimits->TDMaxKHz;
+      TDMaxKHz = NV_MIN(
+          TDMaxKHz, s_ClockRangeLimits[NvRmModuleID_3D].MaxKHz);
+    #endif
     s_ClockRangeLimits[NvRmModuleID_3D].MaxKHz = TDMaxKHz;
 
     // Set Display upper clock boundary with combined Absolute/Scaled limit.

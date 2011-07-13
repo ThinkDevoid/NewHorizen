@@ -1466,6 +1466,20 @@ config CPU_FREQ_S3C24XX_DEBUGFS
 	help
 	  Export status information via debugfs.
 
+config OC_GPCLOCK
+        bool "Overclock Graphics Card"
+        depends on CPU_FREQ
+        default y
+        help
+          This enabled a GPU Clock Overclock from 300mhz to 400mhz.
+
+config OC_AVPCLOCK
+        bool "Overclock System Bus"
+        depends on CPU_FREQ
+        default y
+        help
+          This enabled a System Bus Cverclock from 200mhz to 266mhz.
+
 endif
 
 source "drivers/cpuidle/Kconfig"
