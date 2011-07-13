@@ -40,10 +40,46 @@
 #include "nvrm_memmgr.h"
 #include "ap15/ap15rm_private.h"
 #include "ap15/project_relocation_table.h"
-
+#include <linux/kernel.h>
 
 #define NvRmPrivGetStepMV(hRmDevice, step) \
          (s_ChipFlavor.pSocShmoo->ShmooVoltages[(step)])
+
+#define MAX_OVERCLOCK (1600000)
+#define MAX_VOLTAGE (1350)
+#define MAX_GPCLOCK (400000)
+#define MAX_AVPCLOCK (266400)
+
+// Voltage list for corresponding clocks
+NvU32 FakeShmooVoltages[] = {
+	875,
+	875,
+	875,
+	925,
+	1025,
+	1125,
+	1225,
+	MAX_VOLTAGE // New Entry
+};
+
+NvU32 ClockTableLength = 8; // Original Value: 6
+
+NvRmScaledClkLimits FakepScaledCpuLimits = {
+	101, // FakepScaledCpuLimits.HwDeviceId
+	0, // FakepScaledCpuLimits.SubClockId
+	32, // FakepScaledCpuLimits.MinKHz
+	// Clock table
+	{
+		312000,
+		456000,
+		608000,
+		760000,
+		912000,
+		1000000,
+		MAX_OVERCLOCK, // New Entry
+	}
+};
+
 
 // Extended clock limits IDs
 typedef enum
@@ -142,16 +178,7 @@ NvRmPrivClockLimitsInit(NvRmDeviceHandle hRmDevice)
     // Combine AVP/System clock absolute limit with scaling V/F ladder upper
     // boundary, and set default clock range for all present modules the same
     // as for AVP/System clock
-    AvpMaxKHz = pSKUedLimits->AvpMaxKHz;
-    for (i = 0; i < pShmoo->ScaledLimitsListSize; i++)
-    {
-        if (pHwLimits[i].HwDeviceId == NV_DEVID_AVP)
-        {
-            AvpMaxKHz = NV_MIN(
-                AvpMaxKHz, pHwLimits[i].MaxKHzList[pShmoo->ShmooVmaxIndex]);
-            break;
-        }
-    }
+    AvpMaxKHz = MAX_AVPCLOCK;
 
     for (i = 0; i < NvRmPrivModuleID_Num; i++)
     {
@@ -215,9 +242,7 @@ NvRmPrivClockLimitsInit(NvRmDeviceHandle hRmDevice)
     // Set VDE upper clock boundary with combined Absolute/Scaled limit (on
     // AP15/Ap16 VDE clock derived from the system bus, and VDE maximum limit
     // must be the same as AVP/System).
-    VdeMaxKHz = pSKUedLimits->VdeMaxKHz;
-    VdeMaxKHz = NV_MIN(
-        VdeMaxKHz, s_ClockRangeLimits[NvRmModuleID_Vde].MaxKHz);
+    VdeMaxKHz = MAX_AVPCLOCK;
     if ((hRmDevice->ChipId.Id == 0x15) || (hRmDevice->ChipId.Id == 0x16))
     {
         NV_ASSERT(VdeMaxKHz == AvpMaxKHz);
@@ -226,9 +251,7 @@ NvRmPrivClockLimitsInit(NvRmDeviceHandle hRmDevice)
 
     // Set upper clock boundaries for devices on CPU bus (CPU, Mselect,
     // CMC) with combined Absolute/Scaled limits
-    CpuMaxKHz = pSKUedLimits->CpuMaxKHz;
-    CpuMaxKHz = NV_MIN(
-        CpuMaxKHz, s_ClockRangeLimits[NvRmModuleID_Cpu].MaxKHz);
+    CpuMaxKHz = MAX_OVERCLOCK;
     s_ClockRangeLimits[NvRmModuleID_Cpu].MaxKHz = CpuMaxKHz;
     if ((hRmDevice->ChipId.Id == 0x15) || (hRmDevice->ChipId.Id == 0x16))
     {
@@ -260,9 +283,7 @@ NvRmPrivClockLimitsInit(NvRmDeviceHandle hRmDevice)
         NVRM_SDRAM_MIN_KHZ;
 
     // Set 3D upper clock boundary with combined Absolute/Scaled limit.
-    TDMaxKHz = pSKUedLimits->TDMaxKHz;
-    TDMaxKHz = NV_MIN(
-        TDMaxKHz, s_ClockRangeLimits[NvRmModuleID_3D].MaxKHz);
+    TDMaxKHz = MAX_GPCLOCK;
     s_ClockRangeLimits[NvRmModuleID_3D].MaxKHz = TDMaxKHz;
 
     // Set Display upper clock boundary with combined Absolute/Scaled limit.
@@ -893,17 +914,23 @@ static NvError NvRmBootArgChipShmooGet(
         offset = BootArgSh.CpuShmooVoltagesListOffset;
         size = BootArgSh.CpuShmooVoltagesListSize;
         NV_ASSERT (offset + size <= TotalSize);
-        s_CpuShmoo.ShmooVoltages =(const NvU32*)((NvUPtr)s_pShmooData + offset);
+
+        s_CpuShmoo.ShmooVoltages = &FakeShmooVoltages[0];
+
         size /= sizeof(*s_CpuShmoo.ShmooVoltages);
         NV_ASSERT((size * sizeof(*s_CpuShmoo.ShmooVoltages) ==
               BootArgSh.CpuShmooVoltagesListSize) && (size > 1));
-        s_CpuShmoo.ShmooVmaxIndex = size - 1;
+
+        s_CpuShmoo.ShmooVmaxIndex = ClockTableLength;
+
+	printk(KERN_DEBUG "Shmoo: s_CpuShmoo.ShmooVmaxIndex = %d\n", s_CpuShmoo.ShmooVmaxIndex);
 
         offset = BootArgSh.CpuScaledLimitsOffset;
         size = BootArgSh.CpuScaledLimitsSize;
         NV_ASSERT (offset + size <= TotalSize);
-        s_CpuShmoo.pScaledCpuLimits =
-            (const NvRmScaledClkLimits*)((NvUPtr)s_pShmooData + offset);
+
+	s_CpuShmoo.pScaledCpuLimits = &FakepScaledCpuLimits;
+
         NV_ASSERT(size == sizeof(*s_CpuShmoo.pScaledCpuLimits));
     }
     else

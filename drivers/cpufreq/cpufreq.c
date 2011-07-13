@@ -571,7 +571,7 @@ static ssize_t show_scaling_available_governors(struct cpufreq_policy *policy,
 	struct cpufreq_governor *t;
 
 	if (!cpufreq_driver->target) {
-		i += sprintf(buf, "performance powersave");
+		i += sprintf(buf, "performance conservative");
 		goto out;
 	}
 
@@ -647,6 +647,14 @@ static ssize_t show_scaling_setspeed(struct cpufreq_policy *policy, char *buf)
 	return policy->governor->show_setspeed(policy, buf);
 }
 
+static ssize_t show_scaling_available_frequencies(struct cpufreq_policy *policy, char *buf) 
+{
+  int a=216000, b=300000, c=350000, d=400000, e=450000, f=500000, g=550000, h=600000, i=650000, j=700000, k=750000, l=800000, m=850000, n=900000, o=950000, p=1000000, q=1050000, r=1100000, s=1150000, t=1200000, u=1250000, v=1300000, w=1350000, x=1400000, y=1450000, z=1500000, aa=1550000, ab=1600000; 
+  char *table = buf;
+  table += sprintf(table, "%d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d\n", a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y, z, aa, ab);
+  return table - buf;
+}
+
 #define define_one_ro(_name) \
 static struct freq_attr _name = \
 __ATTR(_name, 0444, show_##_name, NULL)
@@ -672,6 +680,7 @@ define_one_rw(scaling_min_freq);
 define_one_rw(scaling_max_freq);
 define_one_rw(scaling_governor);
 define_one_rw(scaling_setspeed);
+define_one_ro(scaling_available_frequencies);
 
 static struct attribute *default_attrs[] = {
 	&cpuinfo_min_freq.attr,
@@ -685,6 +694,7 @@ static struct attribute *default_attrs[] = {
 	&scaling_driver.attr,
 	&scaling_available_governors.attr,
 	&scaling_setspeed.attr,
+	&scaling_available_frequencies.attr,
 	NULL
 };
 
