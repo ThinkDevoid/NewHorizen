@@ -1,7 +1,7 @@
 VERSION = 2
 PATCHLEVEL = 6
 SUBLEVEL = 32
-EXTRAVERSION = .9-thinkdevoid-ballsy-bearcat
+EXTRAVERSION = .9-00066-g16c1dec-dirty
 NAME = Man-Eating Seals of Antiquity
 
 # *DOCUMENTATION*
