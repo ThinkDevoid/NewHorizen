@@ -54,6 +54,11 @@
 #endif
 
 
+// System Overclock
+#if defined(OC_AVPCLOCK)
+  #define MAX_AVPCLOCK (266400)
+#endif
+
 #if defined(OC_AVPCLOCK)
   #define MAX_AVPCLOCK (266400)
 #endif
@@ -189,6 +194,17 @@ NvRmPrivClockLimitsInit(NvRmDeviceHandle hRmDevice)
     #if defined(OC_AVPCLOCK)
         AvpMaxKHz = MAX_AVPCLOCK;
     #else
+    AvpMaxKHz = pSKUedLimits->AvpMaxKHz;
+    for (i = 0; i < pShmoo->ScaledLimitsListSize; i++)
+    {
+        if (pHwLimits[i].HwDeviceId == NV_DEVID_AVP)
+        {
+            AvpMaxKHz = NV_MIN(
+                AvpMaxKHz, pHwLimits[i].MaxKHzList[pShmoo->ShmooVmaxIndex]);
+            break;
+        }
+    }
+    #endif
     for (i = 0; i < NvRmPrivModuleID_Num; i++)
     {
         NvRmModuleInstance *inst;
@@ -199,7 +215,6 @@ NvRmPrivClockLimitsInit(NvRmDeviceHandle hRmDevice)
 
         }
     }
-    #endif
     // Fill in limits for modules with slectable clock sources and/or dividers
     // as specified by the h/w table according to the h/w device ID
     // (CPU and AVP are not in relocation table - need translate id explicitly)
