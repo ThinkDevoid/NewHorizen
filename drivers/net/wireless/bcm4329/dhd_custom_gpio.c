@@ -50,6 +50,10 @@ int wifi_get_mac_addr(unsigned char *buf);
 void *wifi_get_country_code(char *ccode);
 #endif
 
+#ifdef CUSTOMER_HW4
+#include <mach/gpio.h>
+#endif
+
 #if defined(OOB_INTR_ONLY)
 
 #if defined(BCMLXSDMMC)
@@ -102,6 +106,22 @@ int dhd_customer_oob_irq_map(unsigned long *irq_flags_ptr)
 }
 #endif /* defined(OOB_INTR_ONLY) */
 
+#ifdef CUSTOMER_HW4
+void dhd_reset_chip(void)
+{
+#ifdef CUSTOM_RESET_GPIO_NUM
+        int reset_gpio_num=CUSTOM_RESET_GPIO_NUM;
+#endif
+        WL_TRACE(("%s: call customer specific GPIO to reset chip\n",__FUNCTION__));
+        gpio_set_value(reset_gpio_num,0);
+        msleep(100);
+        gpio_set_value(reset_gpio_num,1);
+        /* Lets customer power to get stable */
+        msleep(500);
+}
+#endif
+
+
 /* Customer function to control hw specific wlan gpios */
 void
 dhd_customer_gpio_wlan_ctrl(int onoff)
@@ -127,6 +147,9 @@ dhd_customer_gpio_wlan_ctrl(int onoff)
 #endif /* CUSTOMER_HW */
 #ifdef CUSTOMER_HW2
 			wifi_set_power(1, 0);
+#endif
+#ifdef CUSTOMER_HW4
+                        dhd_reset_chip();
 #endif
 			WL_ERROR(("=========== WLAN going back to live  ========\n"));
 		break;
@@ -233,6 +256,7 @@ const struct cntry_locales_custom translate_custom_table[] = {
 *  input : ISO 3166-1 country abbreviation
 *  output: customized cspec
 */
+
 void get_customized_country_code(char *country_iso_code, wl_country_t *cspec)
 {
 #ifdef CUSTOMER_HW2
