@@ -46,7 +46,7 @@
          (s_ChipFlavor.pSocShmoo->ShmooVoltages[(step)])
 
 #define MAX_OVERCLOCK (1600000)
-#define MAX_VOLTAGE (1350)
+#define MAX_VOLTAGE (1375)
 #define MAX_GPCLOCK (400000)
 #define MAX_AVPCLOCK (266400)
 
@@ -55,10 +55,10 @@ NvU32 FakeShmooVoltages[] = {
 	875,
 	875,
 	875,
-	925,
-	1025,
-	1125,
-	1225,
+	975,
+	1075,
+	1175,
+	1275,
 	MAX_VOLTAGE // New Entry
 };
 
