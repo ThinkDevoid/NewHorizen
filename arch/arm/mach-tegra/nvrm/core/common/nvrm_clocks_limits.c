@@ -53,15 +53,11 @@
   #define MAX_GPCLOCK (400000)
 #endif
 
-
 // System Overclock
 #if defined(OC_AVPCLOCK)
   #define MAX_AVPCLOCK (266400)
 #endif
 
-#if defined(OC_AVPCLOCK)
-  #define MAX_AVPCLOCK (266400)
-#endif
 // Voltage list for corresponding clocks
 NvU32 FakeShmooVoltages[] = {
 	875,
