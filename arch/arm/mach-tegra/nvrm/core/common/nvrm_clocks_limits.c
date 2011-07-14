@@ -66,7 +66,7 @@ NvU32 FakeShmooVoltages[] = {
 	925,
 	1025,
 	1125,
-	1200
+	1200,
 	MAX_VOLTAGE // New Entry
 };
 
