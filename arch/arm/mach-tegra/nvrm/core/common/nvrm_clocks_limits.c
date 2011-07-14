@@ -45,8 +45,8 @@
 #define NvRmPrivGetStepMV(hRmDevice, step) \
          (s_ChipFlavor.pSocShmoo->ShmooVoltages[(step)])
 
-#define MAX_OVERCLOCK (1600000)
-#define MAX_VOLTAGE (1375)
+#define MAX_OVERCLOCK (1500000)
+#define MAX_VOLTAGE (1300)
 
 // Graphics Overclock
 #if defined(OC_GPCLOCK)
@@ -63,10 +63,10 @@ NvU32 FakeShmooVoltages[] = {
 	875,
 	875,
 	875,
-	975,
-	1075,
-	1175,
-	1275,
+	925,
+	1025,
+	1125,
+	1200
 	MAX_VOLTAGE // New Entry
 };
 
