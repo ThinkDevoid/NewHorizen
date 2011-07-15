@@ -508,7 +508,7 @@ static ssize_t show_cpuinfo_cur_freq(struct cpufreq_policy *policy,
 static ssize_t show_scaling_governor(struct cpufreq_policy *policy, char *buf)
 {
 	if (policy->policy == CPUFREQ_POLICY_POWERSAVE)
-		return sprintf(buf, "powersave\n");
+		return sprintf(buf, "conservative\n");
 	else if (policy->policy == CPUFREQ_POLICY_PERFORMANCE)
 		return sprintf(buf, "performance\n");
 	else if (policy->governor)
@@ -651,7 +651,7 @@ static ssize_t show_scaling_available_frequencies(struct cpufreq_policy *policy,
 {
   int a=216000, b=300000, c=350000, d=400000, e=450000, f=500000, g=550000, h=600000, i=650000, j=700000, k=750000, l=800000, m=850000, n=900000, o=950000, p=1000000, q=1050000, r=1100000, s=1150000, t=1200000, u=1250000, v=1300000, w=1350000, x=1400000, y=1450000, z=1500000; 
   char *table = buf;
-  table += sprintf(table, "%d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d\n", a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y, z);
+  table += sprintf(table, "%d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d\n", a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y, z);
   return table - buf;
 }
 

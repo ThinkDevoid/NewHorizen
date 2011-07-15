@@ -70,7 +70,7 @@ NvU32 FakeShmooVoltages[] = {
 	MAX_VOLTAGE // New Entry
 };
 
-NvU32 ClockTableLength = 8; // Original Value: 6
+NvU32 ClockTableLength = 6; // Original Value: 6
 
 NvRmScaledClkLimits FakepScaledCpuLimits = {
 	101, // FakepScaledCpuLimits.HwDeviceId

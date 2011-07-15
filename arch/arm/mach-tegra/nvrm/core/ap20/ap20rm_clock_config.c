@@ -1752,7 +1752,7 @@ NvRmPrivAp20FastClockConfig(NvRmDeviceHandle hRmDevice)
 
     // Set PLLX0 and CPU clock to SoC maximum (cpu voltage is guaranteed to
     // be nominal during initialization and resume as well)
-    CpuKHz = 1000000;
+    CpuKHz = NvRmPrivGetSocClockLimits(NvRmModuleID_Cpu)->MaxKHz;
     FreqKHz = NvRmPrivGetClockSourceFreq(NvRmClockSource_PllX0);
     if (CpuKHz != FreqKHz)
     {
